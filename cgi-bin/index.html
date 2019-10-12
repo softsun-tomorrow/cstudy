@@ -1,0 +1,75 @@
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>cgi test</title>
+  </head>
+  <body>
+    <form action="/cpp_get.cgi" method="get" target="_blank">
+    名：<input type="text" name="first_name">  <br />
+ 
+    姓：<input type="text" name="last_name" />
+    <input type="submit" value="提交" />
+  </form>
+
+  <hr/>
+
+  <form action="/cpp_get.cgi" method="post" target="_blank">
+    名：<input type="text" name="first_name">  <br />
+ 
+    姓：<input type="text" name="last_name" />
+    <input type="submit" value="提交" />
+  </form>
+
+  <hr/>
+
+  <form action="/cpp_checkbox.cgi" method="POST" target="_blank">
+    <input type="checkbox" name="maths" value="on" /> 数学
+    <input type="checkbox" name="physics" value="on" /> 物理
+    <input type="submit" value="选择学科" />
+  </form>
+
+  <hr/>
+
+  <form action="/cpp_radiobutton.cgi" method="post" target="_blank">
+    <input type="radio" name="subject" value="maths" checked="checked"/> 数学 
+    <input type="radio" name="subject" value="physics" /> 物理
+    <input type="submit" value="选择学科" />
+  </form>
+
+  <hr/>
+
+  <form action="/cpp_textarea.cgi" method="post" target="_blank">
+    <textarea name="textcontent" cols="40" rows="4">
+    请在这里输入文本...
+    </textarea>
+    <input type="submit" value="提交" />
+  </form>
+
+  <hr/>
+
+  <form action="/cpp_dropdown.cgi" method="post" target="_blank">
+    <select name="dropdown">
+      <option value="Maths" selected>数学</option>
+      <option value="Physics">物理</option>
+    </select>
+    <input type="submit" value="提交"/>
+  </form>
+
+  <hr/>
+
+  <form enctype="multipart/form-data" action="/cpp_uploadfile.cgi" method="post" target="_blank">
+    <p>文件：<input type="file" name="userfile" /></p>
+    <p><input type="submit" value="上传" /></p>
+  </form>
+
+  <hr/>
+
+  <a href="/setcookies.cgi" target="_blank">设置Cookie</a>
+
+  <hr/>
+
+  <a href="/getcookies.cgi" target="_blank">获取Cookie</a>
+
+  </body>
+</html>
