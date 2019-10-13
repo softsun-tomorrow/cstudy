@@ -15,7 +15,30 @@
             perror(m); \
         } while(0)
 
-//一个客户端和一个服务端通信
+void do_service(int conn)
+{
+    char recvbuf[1024];
+    while(1)
+    {
+        memset(recvbuf, 0, sizeof(recvbuf));
+        int ret = read(conn, recvbuf, sizeof(recvbuf));
+        //返回值为0 客户端进程关闭了
+        if(ret==0)
+        {
+            printf("client_close\n");
+            break;
+        }
+        else if(ret==-1) //失败了
+        {
+            ERR_EXIT("read");
+        }
+        fputs(recvbuf, stdout);
+        write(conn, recvbuf, ret);
+    }
+
+}
+
+//多个客户端和一个服务器通信
 int main(void)
 {
     int listenfd;
@@ -42,17 +65,27 @@ int main(void)
     struct sockaddr_in peeraddr;
     socklen_t peerlen = sizeof(peeraddr);
     int conn;
-    if((conn = accept(listenfd, (struct sockaddr*)&peeraddr, &peerlen)) < 0)
-        ERR_EXIT("accept");
-
-    printf("ip=%s port=%d\n", inet_ntoa(peeraddr.sin_addr), ntohs(peeraddr.sin_port));
-    char recvbuf[1024];
+    pid_t pid;
     while(1)
     {
-        memset(recvbuf, 0, sizeof(recvbuf));
-        int ret = read(conn, recvbuf, sizeof(recvbuf));
-        fputs(recvbuf, stdout);
-        write(conn, recvbuf, ret);
+        if((conn = accept(listenfd, (struct sockaddr*)&peeraddr, &peerlen)) < 0)
+            ERR_EXIT("accept");
+
+        printf("ip=%s port=%d\n", inet_ntoa(peeraddr.sin_addr), ntohs(peeraddr.sin_port));
+        
+        pid = fork();
+        if(pid == -1)
+            ERR_EXIT("fork");
+        if(pid==0)
+        {
+            close(listenfd);
+            do_service(conn);
+            exit(EXIT_SUCCESS); //一旦函数返回,进程就退出
+        }
+        else
+        {
+            close(conn);
+        }
     }
     close(conn);
     close(listenfd);

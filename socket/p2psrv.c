@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,8 +15,14 @@
         { \
             perror(m); \
         } while(0)
+//信号处理函数
+void handler(int sig)
+{
+    printf("recv a sig=%d\n", sig);
+    exit(EXIT_SUCCESS);
+}
 
-//一个客户端和一个服务端通信
+//点对点的通信 创建两个进程一个用户接收数据，一个用来发送数据
 int main(void)
 {
     int listenfd;
@@ -46,13 +53,43 @@ int main(void)
         ERR_EXIT("accept");
 
     printf("ip=%s port=%d\n", inet_ntoa(peeraddr.sin_addr), ntohs(peeraddr.sin_port));
-    char recvbuf[1024];
-    while(1)
+
+    pid_t pid;
+    pid = fork();
+    if(pid==1)
+        ERR_EXIT("fork");
+    if(pid==0)
     {
-        memset(recvbuf, 0, sizeof(recvbuf));
-        int ret = read(conn, recvbuf, sizeof(recvbuf));
-        fputs(recvbuf, stdout);
-        write(conn, recvbuf, ret);
+        signal(SIGUSR1, handler);
+        char sendbuf[1024] = {0};
+        while(fgets(sendbuf, sizeof(sendbuf), stdin)!=NULL)
+        {            
+            write(conn, sendbuf, strlen(sendbuf));
+            memset(sendbuf, 0, sizeof(sendbuf));//清空
+        }
+        printf("child close");
+        exit(EXIT_SUCCESS);
+    }
+    else //父进程用户接收数据
+    {
+        char recvbuf[1024];
+        while(1)
+        {
+            memset(recvbuf, 0, sizeof(recvbuf));
+            int ret = read(conn, recvbuf, sizeof(recvbuf));
+            if(ret==-1)
+                ERR_EXIT("read");
+            if(ret==0)
+            {
+                printf("peer close\n");
+                break;//跳出循环，程序结束
+            }
+            fputs(recvbuf, stdout);
+        }
+        printf("parent close\n");
+        //父进程退出后，向子进程发送一个信号
+        kill(pid, SIGUSR1);
+        exit(EXIT_SUCCESS);
     }
     close(conn);
     close(listenfd);
