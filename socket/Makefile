@@ -8,7 +8,8 @@ CFLAGS=-Wall -g
 #BIN=echosrv4 echocli4
 #BIN=echosrv5 echocli5
 #BIN=echosrv6 echocli6
-BIN=echosrv7 echocli7
+#BIN=echosrv7 echocli7
+BIN=echosrv8 echocli8
 #BIN=getiplist
 
 all:$(BIN)
